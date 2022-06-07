@@ -1,0 +1,2 @@
+1、install_node_exporter.sh
+批量安装node_exporter监控器（master1、node1、node2、node3、nfs-server）
