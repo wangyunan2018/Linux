@@ -19,7 +19,6 @@ func CreateFtpUser(ftpPath, userName string) {
 	// 判断ftp用户是否存在
 	if _, _, err := cmd.ShellOut("id " + userName); err == nil {
 		fmt.Println("ftp用户已存在")
-		os.RemoveAll(ftpPath)
 		return
 	}
 
