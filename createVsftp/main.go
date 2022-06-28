@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"vsftp/cmd"
 	"vsftp/tools"
 )
@@ -35,50 +34,46 @@ func main() {
 	}
 
 	var (
-		userName string
+		userName   string
+		newFtpPath string
 	)
+
+	// 默认ftp路径
+	ftpPath := "/opt/ftp/wyn"
+	tools.CreateFtpPath(ftpPath)
+
+	fmt.Println("###当前ftp路径###")
+	fmt.Println(ftpPath)
+
+	var str string
+	fmt.Println("是否修改？[yes/no]")
+	fmt.Scanln(&str)
+	switch str {
+	case "y", "Y", "yes", "Yes":
+		fmt.Println("请输入ftp路径：")
+		fmt.Scanln(&newFtpPath)
+		tools.CreateFtpPath(newFtpPath)
+		fmt.Println("当前ftp路径：")
+		fmt.Println(newFtpPath)
+
+		fmt.Println("###添加vsftp用户###")
+		fmt.Println("请输入用户名：")
+		fmt.Scanln(&userName)
+
+		// 创建ftp用户
+		tools.CreateFtpUser(newFtpPath, userName)
+		return
+	case "n", "N", "no", "No":
+		fmt.Println("已沿用当前ftp路径, Next...")
+	default:
+		fmt.Println("请输入yes或者no")
+		return
+	}
 
 	fmt.Println("###添加vsftp用户###")
 	fmt.Println("请输入用户名：")
 	fmt.Scanln(&userName)
 
-	ftpPath := "/opt/wyn/ftp/"
-	err = os.MkdirAll(ftpPath, os.ModePerm)
-	if err != nil {
-		fmt.Println("创建失败，检查是否已存在该ftp目录；", err.Error())
-	}
-
-	addUser := "useradd -s /sbin/nologin -d " + ftpPath + " " + userName + " && " + "chown -R " + userName + ":" + userName + " " + ftpPath
-	_, _, err = cmd.ShellOut(addUser)
-	if err != nil {
-		fmt.Println("用户添加失败，请确认系统中是否已存在该账户；", err.Error())
-		return
-	} else {
-		fmt.Println("FTP用户添加成功。")
-	}
-
-	userPwd := "echo " + userName + " | " + "passwd " + userName + " --stdin"
-	_, stderr, err := cmd.ShellOut(userPwd)
-	if err != nil {
-		fmt.Println("密码设置失败，请手动设置；", err.Error())
-		fmt.Println(stderr)
-	} else {
-		fmt.Println("密码设置成功，默认密码为用户名。")
-	}
-
-	// 追加ftp账号到chroot_list文件中
-	cfgPath := "/etc/vsftpd/chroot_list"
-	file, err := os.OpenFile(cfgPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	defer file.Close()
-
-	_, err = file.WriteString(userName + "\n")
-	if err != nil {
-		fmt.Println("ftp用户追加失败，请检查；", err.Error())
-	}
-
-	// 重启vsftp
-	tools.ResFtp()
+	// 创建ftp用户
+	tools.CreateFtpUser(ftpPath, userName)
 }
