@@ -1,0 +1,4 @@
+创建vsftp或者添加ftp账号只需执行main文件：
+chmod +x main && ./main
+
+shell版本的脚本在此路径下：./sh/ftp.sh
